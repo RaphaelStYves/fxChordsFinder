@@ -20,7 +20,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="fxbeatpartern" target="9" />
+      <module name="fxbeatpartern" target="12" />
     </bytecodeTargetLevel>
   </component>
 </project>
