@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 
 public class ChordFinder {
 
-    String workingDir = System.getProperty("user.dir");
+
 
     private Piece piece;
 
@@ -46,7 +46,6 @@ public class ChordFinder {
     public ChordFinder(Piece piece) throws IOException {
         this.piece = piece;
 
-        getMapofChordBeat();
         getMapofChordsForce();
         getMapofFondamentalChords();
         findScoreOfAllPulsesAndAllChords();
@@ -258,7 +257,9 @@ public class ChordFinder {
         BufferedReader br;
         String line;
 
-        br = new BufferedReader(new FileReader(workingDir + "\\src\\main\\java\\chordFinder\\ChordForce3.csv"));
+        br = new BufferedReader(new FileReader((this.getClass().getResource("ChordForce3.csv").getPath())));
+
+        //workingDir + "\\src\\main\\java\\chordFinder\\ChordForce3.csv")
         while ((line = br.readLine()) != null) {
 
             // use comma as separator
@@ -278,7 +279,7 @@ public class ChordFinder {
         BufferedReader br;
         String line;
 
-        br = new BufferedReader(new FileReader(workingDir + "\\src\\main\\java\\chordFinder\\fondamentalChords.csv"));
+        br = new BufferedReader(new FileReader((this.getClass().getResource("fondamentalChords.csv").getPath())));
         while ((line = br.readLine()) != null) {
 
             // use comma as separator
@@ -292,29 +293,7 @@ public class ChordFinder {
         }
     }
 
-    public void getMapofChordBeat() throws IOException {
-        BufferedReader br;
-        String line;
 
-        List<Integer> beats;
-
-        br = new BufferedReader(new FileReader(workingDir + "\\src\\main\\java\\chordFinder\\algo32\\ChordBeat.csv"));
-
-
-        while ((line = br.readLine()) != null) {
-            // use comma as separator
-            String[] beat = line.split(";");
-
-            beats = new ArrayList<>();
-            for (int i = 1; i < beat.length; i++) {
-                if (Integer.parseInt(beat[i]) > 0) {
-
-                    beats.add(Integer.parseInt(beat[i]));
-                }
-            }
-            mapTableBeatsChords.put(beat[0], beats);
-        }
-    }
 
     public Map<Integer, List<Integer>> getMapfondamentalChordsForEachPulse() {
         return mapfondamentalChordsForEachPulse;

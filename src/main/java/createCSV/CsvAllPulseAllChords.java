@@ -1,5 +1,7 @@
 package createCSV;
 
+import chordFinder.ChordFinder;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
@@ -18,6 +20,8 @@ public class CsvAllPulseAllChords {
 
         try {
             pw = new PrintWriter(new File(workingDir +  "\\src\\main\\java\\midifile\\test.csv"));
+
+
 
             StringBuffer csvHeader = new StringBuffer("");
             StringBuffer csvData = new StringBuffer("");

@@ -3,6 +3,10 @@ package chordFinder.algo32;
 import chordFinder.PulseChord;
 import model.Piece;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +14,7 @@ import java.util.Map;
 public class Chord32 {
 
     private Piece piece;
+    String workingDir = System.getProperty("user.dir");
 
     private Map<String, List<Integer>> mapTableForceChords = new HashMap<>();
     private Map<String, List<Integer>> mapTableBeatsChords = new HashMap<>();
@@ -121,6 +126,28 @@ public class Chord32 {
 
         return temp;
     }
+    public void getMapofChordBeat() throws IOException {
+        BufferedReader br;
+        String line;
 
+        List<Integer> beats;
+
+        br = new BufferedReader(new FileReader(workingDir + "\\src\\main\\java\\chordFinder\\algo32\\ChordBeat.csv"));
+
+
+        while ((line = br.readLine()) != null) {
+            // use comma as separator
+            String[] beat = line.split(";");
+
+            beats = new ArrayList<>();
+            for (int i = 1; i < beat.length; i++) {
+                if (Integer.parseInt(beat[i]) > 0) {
+
+                    beats.add(Integer.parseInt(beat[i]));
+                }
+            }
+            mapTableBeatsChords.put(beat[0], beats);
+        }
+    }
 
 }

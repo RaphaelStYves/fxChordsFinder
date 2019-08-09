@@ -124,9 +124,9 @@ public class Piece {
 
         chords = new ChordFinder(this);
 
-        createNotesObjectFromChords();
-        createTrackList();
-        createMidiFileWithMidiObject();
+       // createNotesObjectFromChords();
+        //createTrackList();
+       // createMidiFileWithMidiObject();
 
 
         return this;
