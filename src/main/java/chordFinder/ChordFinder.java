@@ -7,7 +7,10 @@ import model.Piece;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 public class ChordFinder {
@@ -24,9 +27,14 @@ public class ChordFinder {
     private Map<Integer, List<Integer>> mapfondamentalChordsForEachPulse = new HashMap<>();
 
     public Map<Integer,Map<String,PulseChord>> mapScoreOfEachPulseOfAllChords  = new HashMap<>();
+
+    public Map<Integer,PulseChord> mapbBestChordPulseForEachPulses = new HashMap<>();
+
     public Map<Integer, Integer> mapScoreOneChordAllPulses;
 
     private int[][] pieceMOD12;
+
+    private PulseChord masterPulse = new PulseChord();
 
 
 
@@ -51,29 +59,46 @@ public class ChordFinder {
 
     private void doTheAlgorithm2() {
 
-        int valueOfTheLastPulseChord=0;
-
         for (Map.Entry<Integer, Map<String, PulseChord>> chords : mapScoreOfEachPulseOfAllChords.entrySet()) {
 
             int maxValue = chords.getValue().entrySet().stream().max((entry1, entry2) -> entry1.getValue().score > entry2.getValue().score ? 1 : -1).get().getValue().score;
 
-            if(valueOfTheLastPulseChord-maxValue > 1){
+            if(chords.getKey() == 0){
+                createNewMaster(chords,  maxValue);
+            }else {
 
-                List<PulseChord> listOfallMaxPulseChords = new ArrayList<>();
-                for (PulseChord chord : chords.getValue().values()) {
-                    //proceed all max score of one pulse.
-                    if (chord.score == maxValue) {
-                        listOfallMaxPulseChords.add(chord);
-                    }
+                if(maxValue - chords.getValue().get(masterPulse.Chord).score > 1 ){
+                    createNewMaster(chords,maxValue);
+                }else {
+
+                    repeatOldChord(chords,masterPulse);
                 }
-                PulseChord pulseChord = foreachMaxPulseChordCheckTheNextsPulseScoreUntilOnePulseScoreAreBetter(listOfallMaxPulseChords);
-                valueOfTheLastPulseChord = pulseChord.score;
-
             }
-
-
         }
     }
+
+
+    private void createNewMaster(Map.Entry<Integer, Map<String, PulseChord>> chords, int maxValue) {
+        List<PulseChord> listOfallMaxPulseChords = new ArrayList<>();
+        for (PulseChord chord : chords.getValue().values()) {
+            //proceed all max score of one pulse.
+            if (chord.score == maxValue) {
+                listOfallMaxPulseChords.add(chord);
+            }
+        }
+
+        PulseChord pulseChord = foreachMaxPulseChordCheckTheNextsPulseScoreUntilOnePulseScoreAreBetter(listOfallMaxPulseChords);
+        masterPulse =  pulseChord;
+
+        mapbBestChordPulseForEachPulses.put(chords.getKey(), pulseChord);
+
+    }
+    private void repeatOldChord(Map.Entry<Integer, Map<String, PulseChord>> chords, PulseChord masterPulse) {
+        //take the same chord than last chord
+
+        mapbBestChordPulseForEachPulses.put(chords.getKey(), masterPulse);
+    }
+
 
     private PulseChord foreachMaxPulseChordCheckTheNextsPulseScoreUntilOnePulseScoreAreBetter(List<PulseChord> listOfallMaxPulseChords) {
 
@@ -117,7 +142,7 @@ public class ChordFinder {
 
     private void transformeEChordInRealMidiNote() {
 
-        for (Map.Entry<Integer, String> entry : mapBestChordForEachPulse.entrySet()) {
+        for (Map.Entry<Integer, PulseChord> entry : mapbBestChordPulseForEachPulses.entrySet()) {
 
             mapfondamentalChordsForEachPulse.put(entry.getKey(), mapRefMapFondamentalChords.entrySet().stream().filter(eChordListEntry -> eChordListEntry.getKey().equals(entry.getValue())).map(Map.Entry::getValue).findFirst().orElse(null));
         }
