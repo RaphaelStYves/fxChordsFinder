@@ -124,9 +124,9 @@ public class Piece {
 
         chords = new ChordFinder(this);
 
-       // createNotesObjectFromChords();
-        //createTrackList();
-       // createMidiFileWithMidiObject();
+        createNotesObjectFromChords();
+        createTrackList();
+        createMidiFileWithMidiObject();
 
 
         return this;
@@ -153,7 +153,7 @@ public class Piece {
 
         trackNumber++;
 
-        for (Map.Entry<Integer, List<Integer>> entry : chords.getMapfondamentalChordsForEachPulse().entrySet()){
+        for (Map.Entry<Integer, List<Integer>> entry : chords.mapfondamentalChordsForEachPulse.entrySet()){
 
             for (int j = 0; j < entry.getValue().size(); j++) {
 

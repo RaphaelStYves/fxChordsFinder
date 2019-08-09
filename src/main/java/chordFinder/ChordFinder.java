@@ -24,7 +24,7 @@ public class ChordFinder {
     private Map<String, List<Integer>> mapRefMapFondamentalChords = new HashMap<>();
     public Map<String, Map<Integer, Integer>> mapScoreByChordAllPulses = new HashMap<>();
 
-    private Map<Integer, List<Integer>> mapfondamentalChordsForEachPulse = new HashMap<>();
+    public Map<Integer, List<Integer>> mapfondamentalChordsForEachPulse = new HashMap<>();
 
     public Map<Integer,Map<String,PulseChord>> mapScoreOfEachPulseOfAllChords  = new HashMap<>();
 
@@ -52,7 +52,7 @@ public class ChordFinder {
 
         doTheAlgorithm2();
 
-        transformeEChordInRealMidiNote();
+        transformeStringChordInRealMidiNote();
 
     }
 
@@ -139,11 +139,14 @@ public class ChordFinder {
     }
 
 
-    private void transformeEChordInRealMidiNote() {
+    private void transformeStringChordInRealMidiNote() {
 
         for (Map.Entry<Integer, PulseChord> entry : mapbBestChordPulseForEachPulses.entrySet()) {
 
-            mapfondamentalChordsForEachPulse.put(entry.getKey(), mapRefMapFondamentalChords.entrySet().stream().filter(eChordListEntry -> eChordListEntry.getKey().equals(entry.getValue())).map(Map.Entry::getValue).findFirst().orElse(null));
+            System.out.println(mapRefMapFondamentalChords.entrySet().stream().filter(e -> e.getKey().equals(entry.getValue().Chord)).findFirst().orElse(null));
+
+            mapfondamentalChordsForEachPulse.put(entry.getKey(), mapRefMapFondamentalChords.entrySet().stream().filter(e -> e.getKey().equals(entry.getValue().Chord)).findFirst().orElse(null).getValue());
+
         }
     }
 
@@ -295,9 +298,7 @@ public class ChordFinder {
 
 
 
-    public Map<Integer, List<Integer>> getMapfondamentalChordsForEachPulse() {
-        return mapfondamentalChordsForEachPulse;
-    }
+
 }
 
 
