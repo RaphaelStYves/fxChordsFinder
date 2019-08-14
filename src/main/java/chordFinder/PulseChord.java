@@ -10,9 +10,6 @@ public class PulseChord {
     public int indexPulse;
     public String Chord;
     public int nextsScorePulse;
-
-
-
     public int score;
 
 
@@ -20,17 +17,10 @@ public class PulseChord {
         this.Chord = forceChord;
     }
 
-
-
     public void setIndexPulse(int indexPulse) {
         this.indexPulse = indexPulse;
     }
 
-
-
-    public void put(String key, int multiplyForceByNoteForOneChord) {
-
-    }
 
     public void setScore(int score) {
         this.score = score;

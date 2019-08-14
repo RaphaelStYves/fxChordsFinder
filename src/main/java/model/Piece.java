@@ -1,5 +1,6 @@
 package model;
 
+import VoiceFinder.VoiceFinder;
 import chordFinder.ChordFinder;
 
 import javax.sound.midi.*;
@@ -24,12 +25,9 @@ public class Piece {
     private Track track;
     private ChordFinder chords;
     private int trackNumber = 0;
+    public int medianNoteOfWholePiece;
     File file;
 
-
-
-    //VoiceFinder
-    private int voiceTrack; //base on a score pulse
 
 
     private static final int NOTE_ON = 0x90;
@@ -39,9 +37,6 @@ public class Piece {
     public Piece(File file) throws MidiUnavailableException, InvalidMidiDataException, IOException {
         this.file = file;
         createMidiObject();
-    }
-
-    public Piece() {
     }
 
     public Piece createMidiObject()throws IOException, InvalidMidiDataException, MidiUnavailableException {
@@ -119,17 +114,30 @@ public class Piece {
         removeNoteOff();
         removeNotesWithNoLenght();
         transposeEachNotestoCTonality();
-
         findPieceLenght16();
+        findTheMedianNote();
+
 
         chords = new ChordFinder(this);
 
         createNotesObjectFromChords();
         createTrackList();
+
+        trackModels= new VoiceFinder(trackModels, medianNoteOfWholePiece).voiceFinder();
+
         createMidiFileWithMidiObject();
 
-
         return this;
+    }
+
+    public void findTheMedianNote() {
+
+        Collections.sort(notes, (o1, o2) -> Integer.valueOf(o1.getNote()).compareTo(o2.getNote()));
+        if (notes.size() % 2 == 0)
+            medianNoteOfWholePiece = (notes.get(notes.size()/2).getNote() + notes.get(notes.size()/2 - 1).getNote())/2;
+        else
+            medianNoteOfWholePiece = notes.get(notes.size()/2).getNote();
+
     }
 
     private void findPieceLenght16() {
@@ -202,27 +210,27 @@ public class Piece {
 
     }
 
-    private void createPulsesList(){
-
-        for (int i = 0; i < notes.size(); i++) {
-
-            if ( !pulses.containsKey(notes.get(i).getPulse16())){
-
-                Pulse pulse = new Pulse();
-
-                pulses.put((notes.get(i).getPulse16()), pulse);
-                pulse.addNote((notes.get(i)));
-
-            }else {
-
-                Pulse pulse = pulses.get((notes.get(i).getPulse16()));
-                pulse.addNote(notes.get(i));
-
-            }
-
-        }
-
-    }
+//    private void createPulsesList(){
+//
+//        for (int i = 0; i < notes.size(); i++) {
+//
+//            if ( !pulses.containsKey(notes.get(i).getPulse16())){
+//
+//                Pulse pulse = new Pulse();
+//
+//                pulses.put((notes.get(i).getPulse16()), pulse);
+//                pulse.addNote((notes.get(i)));
+//
+//            }else {
+//
+//                Pulse pulse = pulses.get((notes.get(i).getPulse16()));
+//                pulse.addNote(notes.get(i));
+//
+//            }
+//
+//        }
+//
+//    }
 
     private void createTrackList(){
 
@@ -233,19 +241,19 @@ public class Piece {
                 TrackModel tracknumber = new TrackModel();
 
                 trackModels.put((notes.get(i).getTracknumber()), tracknumber);
+                tracknumber.channel = notes.get(i).channel;
                 tracknumber.addNote((notes.get(i)));
 
             }else {
 
                 TrackModel tracknumber = trackModels.get((notes.get(i).getTracknumber()));
                 tracknumber.addNote(notes.get(i));
-
             }
 
         }
-
-
-
+        for (TrackModel trackModel : trackModels.values()) {
+            trackModel.findAllDataOfTheTrack();
+        }
     }
 
     private void transposeEachNotestoCTonality() {
@@ -253,9 +261,11 @@ public class Piece {
         calculateTransposeForCTonality();
 
         for (int i = 0; i < notes.size(); i++) {
-           notes.get(i).setNote(notes.get(i).getNote() + cTranspose);
-        }
 
+            if(notes.get(i).channel != 9){
+                notes.get(i).setNote(notes.get(i).getNote() + cTranspose);
+            }
+        }
     }
 
     public String fileNameWithoutExtension(File file) {
@@ -307,15 +317,12 @@ public class Piece {
                         if (mtick != mtick2) {
                             notes.get(j).setLength(mtick - mtick2);
                             notes.get(j).setLenght16(mtick - mtick2);
-
                         }
                         break;
                     }
                 }
             }
         }
-
-
     }
 
     private void calculateTransposeForCTonality() {
@@ -339,35 +346,44 @@ public class Piece {
         cTranspose = Collections.min(mapTrans.entrySet(), Map.Entry.comparingByValue()).getKey();
     }
 
-    private void findPieceLenghtInSemiquaver() {
-
-        int temp = 0;
-
-        for (Note note : notes) {
-            if (note.getPulse16() + note.getLenght16() > temp) {
-                temp = note.getPulse16() + note.getLenght16();
-            }
-        }
-
-        pieceLenght16 = temp;
-
-    }
+//    private void findPieceLenghtInSemiquaver() {
+//
+//        int temp = 0;
+//
+//        for (Note note : notes) {
+//            if (note.getPulse16() + note.getLenght16() > temp) {
+//                temp = note.getPulse16() + note.getLenght16();
+//            }
+//        }
+//
+//        pieceLenght16 = temp;
+//
+//    }
 
     public void createMidiFileWithMidiObject() throws InvalidMidiDataException {
 
         //Create the sequence(midi)
         sequence = new Sequence(getDivisionType(), getResolution());
+        track = sequence.createTrack();
+
+        byte[] tempo120 ={(byte)0x07, (byte)0xA1,(byte)0x20};
+        track.add(new MidiEvent(new MetaMessage(0x51, tempo120,  3),0));
 
        for (Map.Entry<Integer, TrackModel> entry : trackModels.entrySet()) {
 
+
+
            track = sequence.createTrack();
+           track.add(new MidiEvent(new MetaMessage(0x03, entry.getValue().trackName.getBytes(), entry.getValue().trackName.getBytes().length),0));
+
+           ShortMessage sm = new ShortMessage();
+           sm.setMessage(ShortMessage.PROGRAM_CHANGE, entry.getValue().getNotes().get(0).getChannel(), entry.getValue().getNotes().get(0).getInstrument(), 0);
+           track.add(new MidiEvent(sm, 0));
 
           for (int i = 0; i < entry.getValue().getNotes().size(); i++) {
 
-            ShortMessage sm = new ShortMessage();
 
-            sm.setMessage(ShortMessage.PROGRAM_CHANGE, entry.getValue().getNotes().get(i).getChannel(), entry.getValue().getNotes().get(i).getInstrument(), 0);
-            track.add(new MidiEvent(sm, 0));
+
 
             //loop for each note in notes//
 
@@ -386,17 +402,27 @@ public class Piece {
 
         }
 
-        saveMidiFile();
+        try {
+            saveMidiFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
-    public void saveMidiFile(){
+    public void saveMidiFile() throws IOException {
+        String workingDir = System.getProperty("user.dir");
+
         try {
-            String workingDir = System.getProperty("user.dir");
             MidiSystem.write(sequence,1, new File(workingDir +  "\\src\\main\\java\\midifile\\" + getName()+"(rebooted).mid"));
 
         } catch (IOException e) {
         }
+
+
+        File file = new File(workingDir +  "\\src\\main\\java\\midifile\\" + getName()+"(rebooted).mid");
+        //Desktop.getDesktop().open(file);
+
     }
 
 
@@ -427,17 +453,6 @@ public class Piece {
 
     public Map<Integer, TrackModel> getTrackNumbers() {
         return trackModels;
-    }
-
-    public void setVoiceTrack(int voiceTrack) {
-        this.voiceTrack = voiceTrack;
-    }
-
-    public class Chord {
-
-        private EChord chord;
-
-
     }
 
    public class Note  {

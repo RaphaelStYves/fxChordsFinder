@@ -1,9 +1,12 @@
-package sample;
+package main;
 
 import VoiceFinder.VoiceFinder;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -41,15 +44,31 @@ public class Main extends Application {
         System.out.println(getClass().getResource("/menuBar/menuBar.fxml"));
         loader.setLocation(getClass().getResource("/menuBar/menuBar.fxml"));
         vbox.getChildren().add(loader.load());
+
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Current project is modified");
+        alert.setContentText("Save?");
+        ButtonType okButton = new ButtonType("Yes", ButtonBar.ButtonData.YES);
+        ButtonType noButton = new ButtonType("Yes", ButtonBar.ButtonData.NO);
+        ButtonType cancelButton = new ButtonType("Yes", ButtonBar.ButtonData.CANCEL_CLOSE);
+        alert.getButtonTypes().setAll(okButton, noButton, cancelButton);
+
+
+
+
+
+
         controllerMenuBar = loader.getController();
-
-
 
         root.setTop(vbox);
 
         primaryStage.setScene(scene);
 
         primaryStage.show();
+
+
+
 
     }
 

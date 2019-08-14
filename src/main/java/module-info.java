@@ -10,7 +10,7 @@ module fxbeatpartern {
         exports menuBar;
         opens menuBar;
 
-        opens sample;
+        opens main;
 
         }
 
